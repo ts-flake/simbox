@@ -1,0 +1,205 @@
+[
+  {
+    "objectID": "examples.chemistry.html",
+    "href": "examples.chemistry.html",
+    "title": "Chemical systems",
+    "section": "",
+    "text": "source\n\n\n\n draw_ellipse (ax=None, center=[0, 0], A=array([[1., 0.],        [0.,\n               1.]]), rho=1, color='b', figsize=(3, 3))\n\nDraw an ellipse defined by a positive-definite matrix A and squared radius rho.",
+    "crumbs": [
+      "Examples",
+      "Chemical systems"
+    ]
+  },
+  {
+    "objectID": "examples.chemistry.html#utils",
+    "href": "examples.chemistry.html#utils",
+    "title": "Chemical systems",
+    "section": "",
+    "text": "source\n\n\n\n draw_ellipse (ax=None, center=[0, 0], A=array([[1., 0.],        [0.,\n               1.]]), rho=1, color='b', figsize=(3, 3))\n\nDraw an ellipse defined by a positive-definite matrix A and squared radius rho.",
+    "crumbs": [
+      "Examples",
+      "Chemical systems"
+    ]
+  },
+  {
+    "objectID": "examples.chemistry.html#cstr",
+    "href": "examples.chemistry.html#cstr",
+    "title": "Chemical systems",
+    "section": "CSTR",
+    "text": "CSTR\nThis example uses the CSTR chemical reactor. The dynamics being \\[\n\\begin{split}\n\\frac{d C_A}{dt} &= \\frac{F}{V}(C_{A0} - C_A) - kC_A^2,\\\\\n\\frac{d T}{dt} &= \\frac{F}{V}(T_0 - T) + \\frac{-\\Delta H}{\\rho_L C_p}kC_A^2 + \\frac{Q}{\\rho_L C_p V},\n\\end{split}\n\\] where \\(k = k_0\\exp(-\\frac{E}{RT})\\). We use the default values for the parameters from the paper.\n\nref:\n\nWu Zhe. “Machine-learning-based predictive control of nonlinear processes. Part II: Computational implementation”, 2019.\n\n\nsource\n\nCSTR\n\n CSTR (set_params_mannually:bool=False,\n       params:Union[list[float],numpy.ndarray]=None)\n\nContinuous Stirred Tank Reactor.\n\nsys = CSTR()\ncstr = SimpleCSimBox(sys, True, True, log_shift_state=True, log_period=0.05)\n\nparams(k0=8460000.0, rho_L=1000.0, C_p=0.231, R=8.314, E=50000.0, F=5.0, T0=300.0, V=1.0, dH=-11500.0)\n\n\n\nviz_diagram(cstr.dgm)\n\n\n\n\n\n\n\n\n\nref_inp = [4,0.]\nref_state = [1.22, 438]\ncstr.initialize([0,0], ref_state, ref_inp, ref_state, True)\ncstr.sim.AdvanceTo(2)\ncstr.sys.plot_log(cstr.get_state_log_items())\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nIntegration with scipy\n\n\n\nSimpleCSimBox has a method extract_dyn to extract the dynamical equation of sys (with its input u shifted, if possible). The returned function takes three inputs, i.e. xdot = f(t,x,u). By partially fixing u, we can call any preferable integration method, e.g. solve_ivp from scipy.integrate to get the trajectory of states in time.\n\n\n\nfrom scipy.integrate import solve_ivp\n\n\nu = [0,0.]\n_f = lambda t,x: cstr.extract_dyn()(t,x,u)\nts = np.linspace(0,2,40)\nres = solve_ivp(_f, [0,2], ref_state, t_eval=ts, method='DOP853')\n\n\ncstr.sys.plot_log((ts, (res.y.T-ref_state).T))  # shift the state",
+    "crumbs": [
+      "Examples",
+      "Chemical systems"
+    ]
+  },
+  {
+    "objectID": "examples.chemistry.html#pfr",
+    "href": "examples.chemistry.html#pfr",
+    "title": "Chemical systems",
+    "section": "PFR",
+    "text": "PFR\nThe plug flow reactor (PFR) is governed by the following PDE \\[\n\\begin{split}\n\\frac{\\partial C_A}{\\partial t} &= -u\\frac{\\partial C_A}{\\partial z} - kC_A\\\\\n\\frac{\\partial T}{\\partial t} &= -u\\frac{\\partial T}{\\partial z} + \\frac{-\\Delta H}{\\rho_L C_P}kC_A + \\frac{U}{\\rho_L C_P A} A_t(T_c - T)\n\\end{split}\n\\] where \\(k = k_0\\exp(-\\frac{E}{RT})\\).",
+    "crumbs": [
+      "Examples",
+      "Chemical systems"
+    ]
+  },
+  {
+    "objectID": "tutorial.optimization.html",
+    "href": "tutorial.optimization.html",
+    "title": "Optimization",
+    "section": "",
+    "text": "import numpy as np\nimport matplotlib.pyplot as plt\nfrom pydrake.solvers import MathematicalProgram, IpoptSolver, Solve\nrefs:",
+    "crumbs": [
+      "Tutorials",
+      "Optimization"
+    ]
+  },
+  {
+    "objectID": "tutorial.optimization.html#mathematical-program",
+    "href": "tutorial.optimization.html#mathematical-program",
+    "title": "Optimization",
+    "section": "Mathematical program",
+    "text": "Mathematical program\nGeneric mathemaical program can be stated as \\[\n\\boxed{\n\\begin{align}\n\\min_x\\ & f(x)\\\\\n\\text{s.t.}\\ & x\\in\\mathcal{S}\n\\end{align}\n}\n\\] where \\(f(x)\\) is an objective function, \\(x\\in\\mathbb{R}^n\\) are decision variables and \\(\\mathcal{S}\\subset\\mathbb{R}^n\\) is a constraint set.\npydrake supports multiple solvers for various categories of optimization problems. The MathematicalProgram class provides a common API to specify an optimization problem, e.g. objectives, constraints, and data structures, to avoid solver-specific codes (similar to YALMIP or JuMP in Julia).\nProblems solvable by pydrake:\n\nLinear programming\nQuadratic programming\nSecond-order cone programming\nNonlinear nonconvex programming\nSemidefinite programming\nSum-of-squares programming\nMixed-integer programming (mixed-integer linear programming, mixed-integer quadratic programming, mixed-integer second-order cone programming).\nLinear complementarity problem\n\n\nMinimal examples\n\n# Set up the optimization problem\nprog = MathematicalProgram()\n# Decision variables\nx = prog.NewContinuousVariables(2)\n# Constraints\nprog.AddConstraint(x[0] + x[1] == 1)\nprog.AddConstraint(x[0] &lt;= x[1])\n# Objective function\nprog.AddCost(x[0] **2 + x[1] ** 2)\n# Solve\nres = Solve(prog)\n\n\n(res.get_solver_id().name(),\n res.is_success(),\n res.get_solution_result(),\n res.GetSolution(x),\n res.get_optimal_cost())\n\n('Clarabel',\n True,\n &lt;SolutionResult.kSolutionFound: 0&gt;,\n array([0.4999745, 0.5000255]),\n 0.5000000013010027)\n\n\npydrake will automatically chooses a solver for us, for more info see here. Also, note that in the example above we do not specify the initial guess, by default it is set to zeros. We can pick a solver and suggest an initial guess as shown below.\n\n# Use IPOPT solver\nsolver = IpoptSolver()\n# Suggest an initial guess\nres = solver.Solve(prog, np.array([1, 1]))\n\n(res.get_solver_id().name(),\n res.is_success(),\n res.get_solution_result(),\n res.GetSolution(x),\n res.get_optimal_cost())\n\n('IPOPT',\n True,\n &lt;SolutionResult.kSolutionFound: 0&gt;,\n array([0.4999965, 0.5000035]),\n 0.5000000000245315)\n\n\n\n\n\n\n\n\nCallback\n\n\n\nSometimes, it is usefull to see the intermediate values of the decision variables. We can use .AddVisualizationCallback to visualize/store/check those values.\n\n\n\nfig, ax = plt.subplots(figsize=(2,2))\ncurve_x = np.linspace(1, 10, 100)\nax.plot(curve_x, 9./curve_x, 'k')\nax.plot(-curve_x, -9./curve_x, 'k')\nax.plot(0, 0, 'rs')\nx0 = [4., 5.]\nax.plot(*x0, 'C2s')\n\ndef update(x):\n    ax.plot(x[0], x[1], 'C0x')\n\n# Find the closest point on a curve to the origin\nprog = MathematicalProgram()\nx = prog.NewContinuousVariables(2)\nprog.AddConstraint(x[0] * x[1] == 9)\nprog.AddCost(x[0]**2 + x[1]**2)\nprog.AddVisualizationCallback(update, x)\nres = Solve(prog, x0)\n(res.GetSolution(), res.get_optimal_cost())  # analytical best at (3,3) or (-3,-3)",
+    "crumbs": [
+      "Tutorials",
+      "Optimization"
+    ]
+  },
+  {
+    "objectID": "tutorial.optimization.html#double-integrator-mpc",
+    "href": "tutorial.optimization.html#double-integrator-mpc",
+    "title": "Optimization",
+    "section": "Double integrator MPC",
+    "text": "Double integrator MPC\n\n# Double integrator\n# xddot = u\ndef _dyn(x, u):\n    return np.array([x[1], u])\n\n# Forward Euler\ndef integrate(x, u, dt, t):\n    _t = 0\n    _x = x.copy()\n    while _t &lt; t:\n        dx = _dyn(x, u)\n        _x = _x + dx * dt\n        _t += dt\n    return _x\n        \ndef apply_ctrls(x, u, dt=0.01):\n    xs = [x.copy()]\n    for ui in u:\n        xs.append(integrate(xs[-1], ui, dt, 1.))\n    return np.array(xs)\n    \ndef cost_fn(u):\n    xs = apply_ctrls(X, u)\n    return (xs**2).sum()\n\n\ndef mpc_one_step(u0, noise, solver):\n    global X,U\n    if solver is not None:\n        res = solver.Solve(prog, u0)\n        if res.get_solver_details().status != 0: return None\n    else: \n        res = Solve(prog, u0, None)\n        if not res.is_success(): return None\n    U = res.GetSolution()\n    X = integrate(X, U[0], 0.01, 1.)\n    if noise is not None: X = X + np.random.randn(1) * noise\n    return X.copy(), U.copy()\n\ndef mpc(n_step=10, noise=None, solver=None):\n    global X,U\n    xs,us = [X.copy()],[U.copy()]\n    for step in range(n_step):\n        res = mpc_one_step(U, noise, solver)\n        if res is None: print(f'Solver fails, stops at {step}.'); break\n        xs.append(res[0])\n        us.append(res[1])\n    return xs,us\n\n\nglobal X,U\nX = np.array([-2,0.])         # initial (pos, velo)\nU = np.zeros((n_horizen:=3))  # horizion\n\nprog = MathematicalProgram()\nu = prog.NewContinuousVariables(n_horizen, 'u')\nprog.AddBoundingBoxConstraint(-5,5,u)\nprog.AddCost(cost_fn, u)\n# Do MPC for `n_step` steps,\n# noise in observations, not in model\ntrajs = mpc((n_step:=10), solver=IpoptSolver(), noise=0.5)",
+    "crumbs": [
+      "Tutorials",
+      "Optimization"
+    ]
+  },
+  {
+    "objectID": "examples.physics.html",
+    "href": "examples.physics.html",
+    "title": "Physical systems",
+    "section": "",
+    "text": "The Acrobot|MIT Course\n\n\nRefer to the drawing of the Acrobot, a double pendulum is even simpler with mass concentrated at the end of each rod, i.e. \\(l_{c1/2}=l_{1/2}, I_{1/2}=0\\). Note that the joint angle \\(q_2\\) is relative.\n\nsource\n\n\n\n DoublePendulumSimBox (m1=1.0, m2=1.0, l1=1.0, l2=1.0, b1=0.0, b2=0.0,\n                       g=9.81, log_period=0.0)\n\nTo quickly make a double pendulum simulation.\n\npend = DoublePendulumSimBox(log_period=0.1)\n\n\nviz_diagram(pend.dgm)\n\n\n\n\n\n\n\n\n\npend.initialize([0.], [1,-3.14,0,0], force_init=True)\npend.sim.AdvanceTo(5)\npend.plot_log_with_energy()\n\n\n\n\n\n\n\n\n\npend.show_animation()\n\n\n  \n  Your browser does not support the video tag.\n\n\n\nThe analytical expression of the EoM of a double pendulum is taken from the tutorial of Lagrngian NN, where state = (theta1, theta2, theta_dot1, theta_dot2).\n\nsource\n\n\n\n\n eom_double_pendulum (state, t=0, m1=1, m2=1, l1=1, l2=1, g=9.81,\n                      is_relative=True)\n\nRefer to LNN tutorial\n\nassert np.allclose(eom_double_pendulum([1,1,1,0]), pend.extract_dyn()(0,[1,1,1,0],[0]))",
+    "crumbs": [
+      "Examples",
+      "Physical systems"
+    ]
+  },
+  {
+    "objectID": "examples.physics.html#double-pendulum",
+    "href": "examples.physics.html#double-pendulum",
+    "title": "Physical systems",
+    "section": "",
+    "text": "The Acrobot|MIT Course\n\n\nRefer to the drawing of the Acrobot, a double pendulum is even simpler with mass concentrated at the end of each rod, i.e. \\(l_{c1/2}=l_{1/2}, I_{1/2}=0\\). Note that the joint angle \\(q_2\\) is relative.\n\nsource\n\n\n\n DoublePendulumSimBox (m1=1.0, m2=1.0, l1=1.0, l2=1.0, b1=0.0, b2=0.0,\n                       g=9.81, log_period=0.0)\n\nTo quickly make a double pendulum simulation.\n\npend = DoublePendulumSimBox(log_period=0.1)\n\n\nviz_diagram(pend.dgm)\n\n\n\n\n\n\n\n\n\npend.initialize([0.], [1,-3.14,0,0], force_init=True)\npend.sim.AdvanceTo(5)\npend.plot_log_with_energy()\n\n\n\n\n\n\n\n\n\npend.show_animation()\n\n\n  \n  Your browser does not support the video tag.\n\n\n\nThe analytical expression of the EoM of a double pendulum is taken from the tutorial of Lagrngian NN, where state = (theta1, theta2, theta_dot1, theta_dot2).\n\nsource\n\n\n\n\n eom_double_pendulum (state, t=0, m1=1, m2=1, l1=1, l2=1, g=9.81,\n                      is_relative=True)\n\nRefer to LNN tutorial\n\nassert np.allclose(eom_double_pendulum([1,1,1,0]), pend.extract_dyn()(0,[1,1,1,0],[0]))",
+    "crumbs": [
+      "Examples",
+      "Physical systems"
+    ]
+  },
+  {
+    "objectID": "tutorial.dynamical_systems.html",
+    "href": "tutorial.dynamical_systems.html",
+    "title": "Dynamical systems",
+    "section": "",
+    "text": "import numpy as np\nfrom pydrake.common.containers import namedview\nfrom pydrake.systems.framework import BasicVector, LeafSystem\nfrom pydrake.systems.analysis import Simulator\nThis tutorial provides a basic guide to construct a dynamical system with pydrake’s modeling capability.\nrefs:",
+    "crumbs": [
+      "Tutorials",
+      "Dynamical systems"
+    ]
+  },
+  {
+    "objectID": "tutorial.dynamical_systems.html#system",
+    "href": "tutorial.dynamical_systems.html#system",
+    "title": "Dynamical systems",
+    "section": "System",
+    "text": "System\nIn pydrake and engineering, a system is an abstraction consisting:\n\ninput/ouput ports\nstate\nparameters\n\n\n\n\n\n\ngraph LR\nI[\"input1\\ninput2\\n...\"]\nO[\"output1\\noutput2\\n...\"]\n\nS[\"state;\\nparameters\"]\nI--&gt;S\nS--&gt;O\n\n\n\n\n\n\npydrake provides a rich set of systems. We can also define our own dynamical systems deriving from the LeafSystem class.\n\n\n\n\n\n\npydrake supports both numeric and symbolic variables, however, we will omit the symbolic case in this tutorial.\n\n\n\n\nI/O ports\n\n# I/O ports\nclass TstSys(LeafSystem):\n    def __init__(self):\n        super().__init__()\n        self._inp = self.DeclareVectorInputPort(name='in', size=2)\n        self.DeclareVectorOutputPort(name='out', size=2, calc=self.calc_outp)\n    \n    def calc_outp(self, ctx, outp):\n        # Callback of the output port.\n        # print(type(outp))\n        res = self._inp.Eval(ctx)  # Use .Eval() to get the values\n        outp.SetFromVector(res)    # Set the values of the output vector or use `.set_value()`\n\n\ntst_sys = TstSys()\nctx = tst_sys.CreateDefaultContext()\ntst_sys.GetInputPort('in').FixValue(ctx, [0.,1])  # Fix the values of the input to constants\nprint(f\"Evaluate/Call the input port: {tst_sys.GetInputPort('in').Eval(ctx)}\")\nprint(f\"Evaluate/Call the input port: {tst_sys.EvalVectorInput(ctx,0)}\")  # convenient alternative _only_ for vector input\nprint(f\"Evaluate/Call the output port: {tst_sys.GetOutputPort('out').Eval(ctx)}\")\n\nEvaluate/Call the input port: [0. 1.]\nEvaluate/Call the input port: [0.0, 1.0]\nEvaluate/Call the output port: [0. 1.]\n\n\n\n# We can get the I/O ports either by `attrs` or `.GetIn/OutputPort(name)`.\ntst_sys.GetInputPort('in'), tst_sys._inp\n\n(&lt;pydrake.systems.framework.InputPort&gt;,\n &lt;pydrake.systems.framework.InputPort&gt;)\n\n\n\n\n\n\n\n\nContext\n\n\n\nYou may have notice the keyword ctx which is a shorthand for Context. In pydrake, each System has it own Context, which basically stores all information we needs to actually run it (think of it as a ‘table’, a system knows how to make its own table, .CreateDefaultContext(), for users or other codes to edit). A Context includes the time t, the state x, any inputs u, and any system parameters p. Note, all inputs of a System must be defined, either tied to the outputs of another system or fixed via FixValue().\n\n\n\n\nState\n\n# State\nclass TstSys(LeafSystem):\n    def __init__(self):\n        super().__init__()\n        self._ds1 = self.DeclareDiscreteState(1)  # DiscreteStateIndex(0), aka group number\n        self._ds2 = self.DeclareDiscreteState(2)  # DiscreteStateIndex(1)\n        self._cs = self.DeclareContinuousState(2) # ContinuousStateIndex(0), can _only_ have zero or one continous state, i.e. 0\n        self._ds1_outp = self.DeclareStateOutputPort('ds1', self._ds1)\n        self._cs_outp = self.DeclareStateOutputPort('cs', self._cs)\n\n        # Set the rules on how to update the discrete states, i.e. `x[n+1] = f(n,x[n],u,p)`.\n        # Starting from `offset_sec` and every `period_sec`.\n        # Different dicrete states can be updated with their own rules.\n        self.DeclarePeriodicDiscreteUpdateEvent(period_sec=1.0, offset_sec=0.0, update=self.update1)\n        self.DeclarePeriodicDiscreteUpdateEvent(period_sec=2.0, offset_sec=0.0, update=self.update2)\n\n    def update1(self, ctx, outp):\n        print(f'update1 is called at {ctx.get_time()}s')\n        # print(type(outp))\n        x = ctx.get_discrete_state(0).get_mutable_value()  # _ds1\n        xp = x**2\n        outp.get_mutable_vector(0).set_value(xp)\n\n    def update2(self, ctx, outp):\n        print(f'update2 is called at {ctx.get_time()}s')\n        # print(type(outp))\n        x = ctx.get_discrete_state(1).get_mutable_value()  # _ds2\n        xp = x+1\n        outp.get_mutable_vector(1).set_value(xp)\n    \n    # For continous state.\n    # xdot = f(x,u,t,p)\n    def DoCalcTimeDerivatives(self, ctx, outp):\n        # print(type(outp))\n        x = ctx.get_continuous_state_vector().get_mutable_value()\n        xd = -x\n        outp.get_mutable_vector().SetFromVector(xd)  # Or with `.set_value()`\n\n\ntst_sys = TstSys()\nsim = Simulator(tst_sys)\nctx = sim.get_mutable_context()\n\n# Set initial states\nctx.SetDiscreteState(0, [.9])  # idx (group num), vals\nctx.SetDiscreteState(1, [1., 2.])\nctx.SetContinuousState([2., -2.])\nprint('===Inital===')\nprint(f'discrete1: {ctx.get_discrete_state(0)}, discrete2: {ctx.get_discrete_state(1)};\\ncontinous: {ctx.get_continuous_state_vector()}\\n')\n\n# Simulate\nsim.AdvanceTo(4.)\nprint('===Current===')\nprint(f'discrete1: {ctx.get_discrete_state(0)}, discrete2: {ctx.get_discrete_state(1)};\\ncontinous: {ctx.get_continuous_state_vector()}\\n')\n\n===Inital===\ndiscrete1: [0.9], discrete2: [1.0, 2.0];\ncontinous: [2.0, -2.0]\n\nupdate1 is called at 0.0s\nupdate2 is called at 0.0s\nupdate1 is called at 1.0s\nupdate1 is called at 2.0s\nupdate2 is called at 2.0s\nupdate1 is called at 3.0s\n===Current===\ndiscrete1: [0.18530201888518424], discrete2: [3.0, 4.0];\ncontinous: [0.036626510817661724, -0.036626510817661724]\n\n\n\n\n\n\n\n\n\n.get_discrete_state_vector() is a convenience method that can only be called when there is no more than one group of discrete state. Otherwise, .get_discrete_state(0).get_mutable_value() does the same thing and works in general.\n\n\n\n\ntst_sys.EvalTimeDerivatives(ctx)\n# tst_sys.EvalUniquePeriodicDiscreteUpdate(ctx).get_vector()  # works if there is _only one_ discrete update event\n\n&lt;pydrake.systems.framework.ContinuousState&gt;\n\n\n\n\n\n\n\n\nVector\n\n\n\nVectors in pydrake are special datatypes, e.g. VectorBase and BasicVector. VectorBase is an abstract base class, it has methods like .GetAtIndex(), .SetAtIndex(), .SetFromVector(), and .CopyToVector(); BasicVector inherits all those and has additional methods like .get_value() and .set_value().\n.get_mutable_vector() returns an editable vector object, while .get_vector() is only for read; same goes for .get_mutable_value() and .get_value().\n\n\n\n\n\n\n\n\noutp\n\n\n\nI have used outp as a semantic-free word in all examples, and its type(outp) should be clear from the context where it appears. E.g., in calc_outp(ctx, outp), outp is just a container, i.e. BasicVector; in update(ctx, outp), it is DiscreteValues; in DoCalcTimeDerivatives(ctx, outp) it is ContinuousState.\n\n\n\n\nParameters, publish and namedview\n\n# Parameters\nclass TstSys(LeafSystem):\n    param_names = namedview('params', ('temp','vol'))  # Belongs to the class\n    def __init__(self):\n        super().__init__()\n        self.DeclareNumericParameter(BasicVector([23, 1]))  # Must be `BasicVector`\n        # Calling `ForcedPublish()` on `System` will trigger this callback.\n        self.DeclareForcedPublishEvent(self.publish)\n        # Publish once every second.\n        self.DeclarePeriodicPublishEvent(period_sec=1, offset_sec=0, publish=self.publish)\n        \n    def publish(self, ctx):\n        params = self.param_names(ctx.get_numeric_parameter(0).get_value())\n        print(f\"publish parameters: temp={params.temp}, vol={params.vol}\")\n\n\ntst_sys = TstSys()\nsim = Simulator(tst_sys)\nctx = tst_sys.CreateDefaultContext()\n\nsim.AdvanceTo(2)\nprint('\\n===ForcedPublish===')\ntst_sys.ForcedPublish(sim.get_context())\n\npublish parameters: temp=23.0, vol=1.0\npublish parameters: temp=23.0, vol=1.0\npublish parameters: temp=23.0, vol=1.0\n\n===ForcedPublish===\npublish parameters: temp=23.0, vol=1.0\n\n\n\n\n\n\n\n\nnamedview is similar to namedtuple in python, it enables us to access the values of an array by their field names. Note that an instantiated object is a view (reference) of the source not a copy.",
+    "crumbs": [
+      "Tutorials",
+      "Dynamical systems"
+    ]
+  },
+  {
+    "objectID": "tutorial.dynamical_systems.html#simulator",
+    "href": "tutorial.dynamical_systems.html#simulator",
+    "title": "Dynamical systems",
+    "section": "Simulator",
+    "text": "Simulator\n\nfrom pydrake.systems.analysis import GetIntegrationSchemes, ExtractSimulatorConfig, ApplySimulatorConfig, PrintSimulatorStatistics\n\nA Simulator can advance the state of a Systemto desired boundary_time (sec). The default integrator uses RK3, we can check available schemes from GetIntegrationSchemes().\nEach Simulator has its internally-maintained Context, i.e. independent of that of a System or any current ctx in use. We can .reset_context(ctx) to replace the internal one with ctx.\n\nGetIntegrationSchemes()\n\n['bogacki_shampine3',\n 'explicit_euler',\n 'implicit_euler',\n 'radau1',\n 'radau3',\n 'runge_kutta2',\n 'runge_kutta3',\n 'runge_kutta5',\n 'semi_explicit_euler',\n 'velocity_implicit_euler']\n\n\n\n# Configure a simulator\ntst_sys = TstSys()\nsim = Simulator(tst_sys)\n\nsim_cfg = ExtractSimulatorConfig(sim)\nprint(f'===Before cfg===\\n{sim_cfg}\\n')\n\nsim_cfg.integration_scheme = 'explicit_euler'\nApplySimulatorConfig(sim_cfg, sim)\nprint(f'===After cfg===\\n{sim_cfg}')\n\n===Before cfg===\nSimulatorConfig(integration_scheme='runge_kutta3', max_step_size=0.1, accuracy=0.0001, use_error_control=True, target_realtime_rate=0.0, publish_every_time_step=False)\n\n===After cfg===\nSimulatorConfig(integration_scheme='explicit_euler', max_step_size=0.1, accuracy=0.0001, use_error_control=True, target_realtime_rate=0.0, publish_every_time_step=False)\n\n\n\n# Print simulation details\nsim.AdvanceTo(2)\nPrintSimulatorStatistics(sim)\n\npublish parameters: temp=23.0, vol=1.0\npublish parameters: temp=23.0, vol=1.0\npublish parameters: temp=23.0, vol=1.0\nGeneral stats regarding discrete updates:\nNumber of time steps taken (simulator stats) = 2\nSimulator publishes every time step: false\nNumber of publishes = 3\nNumber of discrete updates = 0\nNumber of \"unrestricted\" updates = 0\n\nNote: the following integrator took zero steps. The simulator exclusively used the discrete solver.\n\nStats for integrator ExplicitEulerIntegrator with fixed steps:\nNumber of time steps taken (integrator stats) = 0\nNumber of derivative evaluations = 0\nNumber of steps shrunk due to convergence-based failure = 0\nNumber of convergence-based step failures (should match) = 0\n\n\n\nMonitor\nUse monitors to print, record, and interrupt simulations. For logging, we can use pydrake’s LogVectorOutput and VectorLogSink in a Diagram.\n\nfrom pydrake.systems.framework import EventStatus\n\n\n_stats = []\ndef recorder(ctx):\n    print((_t:=ctx.get_time()))\n    _stats.append(_t)\n    return EventStatus.Succeeded()\ndef early_stop(ctx):\n    if ctx.get_time() &gt; .5: return EventStatus.ReachedTermination(tst_sys, 't=.5 reached')\n    return EventStatus.Succeeded()\n\n\ntst_sys = TstSys()\nsim = Simulator(tst_sys)\n\n# Can have only one monitor\nsim.set_monitor(recorder)\n# sim.set_monitor(early_stop)\n\n\nstatus = sim.AdvanceTo(.5)\nstatus.message(), _stats\n\npublish parameters: temp=23.0, vol=1.0\n0.0\n0.5\n\n\n('', [0.0, 0.5])",
+    "crumbs": [
+      "Tutorials",
+      "Dynamical systems"
+    ]
+  },
+  {
+    "objectID": "tutorial.dynamical_systems.html#diagram",
+    "href": "tutorial.dynamical_systems.html#diagram",
+    "title": "Dynamical systems",
+    "section": "Diagram",
+    "text": "Diagram\nA Diagram is a collection of Systems inter-connected together. It is also a System, i.e. we can form nested diagrams.\n\nfrom pydrake.systems.framework import DiagramBuilder\nfrom pydrake.systems.primitives import AffineSystem, ConstantVectorSource ,LogVectorOutput\n\n\ninp_src = ConstantVectorSource(np.array([1.,2.]))\naff_sys = AffineSystem(A=-np.eye(2), B=-np.eye(2), C=np.eye(2), y0=np.ones(2))\nbuilder = DiagramBuilder()\n# Add subsystems\nbuilder.AddNamedSystem('src', inp_src)\nbuilder.AddNamedSystem('aff', aff_sys)\n# Connect subsystems\nbuilder.Connect(inp_src.get_output_port(), aff_sys.get_input_port())\n# Export I/O port of a diagram, no inputport in this example\nbuilder.ExportOutput(aff_sys.get_output_port())\n# Add logger\nlogger = LogVectorOutput(aff_sys.get_output_port(), builder, 0.1)  # publish_period=0.1\nlogger.set_name('aff_outp')\n\ndgm = builder.Build()\ndgm.set_name('aff_diag')\n\n\nimport pydot\nfrom IPython.display import SVG, display\nimport matplotlib.pyplot as plt\n\n\ndisplay(SVG(pydot.graph_from_dot_data(dgm.GetGraphvizString(max_depth=2))[0].create_svg()))\n\n\n\n\n\n\n\n\n\nsim = Simulator(dgm)\nctx = sim.get_mutable_context()\n\nlogger.FindMutableLog(ctx).Clear()\nsim.AdvanceTo(2)\nlog = logger.FindLog(ctx)\n\n\nts,vals = log.sample_times(),log.data()\nfig,ax = plt.subplots(figsize=(2,2))\nax.plot(ts, vals[0], 'x-', label='y[0]')\nax.plot(ts, vals[1], 'x-', label='y[1]')\nax.set_xlabel('t (sec)')\nax.legend();\n\n\n\n\n\n\n\n\n\nContext from root\nThe Context of a Diagram is a nested (tree) of its subsystems’ Contexts. It is preferable to change the values of a subsystem’s Context by retrieving it from the root.\n\ndgm_ctx = dgm.CreateDefaultContext()\nprint(dgm_ctx)\n\n::aff_diag Context (of a Diagram)\n----------------------------------\n2 total continuous states\n2 total numeric parameters in 1 groups\n\n::aff_diag::src Context\n------------------------\nTime: 0\nParameters:\n  1 numeric parameter groups with\n     2 parameters\n       1 2\n\n::aff_diag::aff Context\n------------------------\nTime: 0\nStates:\n  2 continuous states\n    0 0\n\n\n\n\n\n# Context from root\nsrc_ctx = inp_src.GetMyContextFromRoot(dgm_ctx)\nsrc_ctx.get_numeric_parameter(0).set_value([-1,-2.])\nprint(dgm_ctx)\n\n::aff_diag Context (of a Diagram)\n----------------------------------\n2 total continuous states\n2 total numeric parameters in 1 groups\n\n::aff_diag::src Context\n------------------------\nTime: 0\nParameters:\n  1 numeric parameter groups with\n     2 parameters\n       -1 -2\n\n::aff_diag::aff Context\n------------------------\nTime: 0\nStates:\n  2 continuous states\n    0 0",
+    "crumbs": [
+      "Tutorials",
+      "Dynamical systems"
+    ]
+  },
+  {
+    "objectID": "core.html",
+    "href": "core.html",
+    "title": "Core",
+    "section": "",
+    "text": "source\n\n\n\n viz_diagram (dgm, max_depth=1)\n\nVisualize a Diagram.\n\nsource\n\n\n\n\n set_sim_cfg (sim, cfg={}, verbose=False)\n\nSet Simulator’s configuration.\n\nsource\n\n\n\n\n mk_log_diagram (sys, inp_idx:Union[int,str]=0, outp_idx:Union[int,str]=0,\n                 log_period:float=0.0)\n\nReturns a diagram with one (or zero) input port and one output port exported; a logger to that output port.\n\nsource\n\n\n\n\n ParamsMixin ()\n\nMixin to update parameters from their fields.\n\nsource\n\n\n\n\n sample_ellipsoid (n_dim:int, n_pt:int, A:numpy.ndarray=None, rho:float=1)\n\nSample n_pt states from a n-dim ellipsoid defined by a positive-definite matrix A and the squared radius rho.\n\nsource\n\n\n\n\n sample_ball (n_dim:int, r:float)\n\nUniformly sample from a n_dim-hyperball with a radius r.",
+    "crumbs": [
+      "Core"
+    ]
+  },
+  {
+    "objectID": "core.html#utils",
+    "href": "core.html#utils",
+    "title": "Core",
+    "section": "",
+    "text": "source\n\n\n\n viz_diagram (dgm, max_depth=1)\n\nVisualize a Diagram.\n\nsource\n\n\n\n\n set_sim_cfg (sim, cfg={}, verbose=False)\n\nSet Simulator’s configuration.\n\nsource\n\n\n\n\n mk_log_diagram (sys, inp_idx:Union[int,str]=0, outp_idx:Union[int,str]=0,\n                 log_period:float=0.0)\n\nReturns a diagram with one (or zero) input port and one output port exported; a logger to that output port.\n\nsource\n\n\n\n\n ParamsMixin ()\n\nMixin to update parameters from their fields.\n\nsource\n\n\n\n\n sample_ellipsoid (n_dim:int, n_pt:int, A:numpy.ndarray=None, rho:float=1)\n\nSample n_pt states from a n-dim ellipsoid defined by a positive-definite matrix A and the squared radius rho.\n\nsource\n\n\n\n\n sample_ball (n_dim:int, r:float)\n\nUniformly sample from a n_dim-hyperball with a radius r.",
+    "crumbs": [
+      "Core"
+    ]
+  },
+  {
+    "objectID": "core.html#system",
+    "href": "core.html#system",
+    "title": "Core",
+    "section": "System",
+    "text": "System\n\nsource\n\nShift\n\n Shift (y0:Union[numpy.ndarray,list[float]], name:str='')\n\nShift the input u by y0, i.e. y = u + y0.\n\nsource\n\n\nSimpleCSimBox\n\n SimpleCSimBox (sys, add_shift_inp:bool=False, add_shift_state:bool=False,\n                log_shift_inp:bool=False, log_shift_state:bool=False,\n                log_period:float=0.0, inp_src=None)\n\nA common place to store a Diagram built from a continuous System with possible input shift and state output shift, a Simulator, a logger (LogVectorOutput).\n\n\n\n\n\n\n\n\n\n\nType\nDefault\nDetails\n\n\n\n\nsys\n\n\nAssume it has only one input port and one state output port.\n\n\nadd_shift_inp\nbool\nFalse\nTrue if there’s a reference input.\n\n\nadd_shift_state\nbool\nFalse\nTrue if there’s a reference state.\n\n\nlog_shift_inp\nbool\nFalse\nLog the original (only valid when inp_src is provided) input or the shifted.\n\n\nlog_shift_state\nbool\nFalse\nLog the original state or the shifted.\n\n\nlog_period\nfloat\n0.0\nFrequency to log, per sec.\n\n\ninp_src\nNoneType\nNone\nInput source\n\n\n\n\nsource\n\n\nSimpleCSimBox.initialize\n\n SimpleCSimBox.initialize (inp_val=None, state_val=None, ref_inp=None,\n                           ref_state=None, force_init=False)\n\nSet reference input and state, if any. FixValue input port with inp_val if there is no inp_src.\n\nsource\n\n\nSimpleCSimBox.extract_dyn\n\n SimpleCSimBox.extract_dyn ()\n\nReturns the (callable) dynamical equation xdot = f(t,x,u) where u is the (possibly) shifted control input, x is the original state.\n\n# xdot = x - u\n#    y = x\nsys = AffineSystem(A=np.eye(2), B=-np.eye(2), C=np.eye(2)); sys.set_name('aff')\ntst = SimpleCSimBox(sys, True, True, True, True, 0.2)\n\n\nviz_diagram(tst.dgm)\n\n\n\n\n\n\n\n\n\ntst.initialize([0,0], [1,1], ref_inp=[0,1], ref_state=[-1,0], force_init=True)\n\n\n# tst.clear_log()\ntst.sim.AdvanceTo(2)\ntst.plot_log()",
+    "crumbs": [
+      "Core"
+    ]
+  },
+  {
+    "objectID": "core.html#source",
+    "href": "core.html#source",
+    "title": "Core",
+    "section": "Source",
+    "text": "Source\n\nsource\n\nBoxRandomSource\n\n BoxRandomSource (n_dim, ub, lb, sampling_period=1.0, seed=None)\n\nUniform random source with box-contraints.",
+    "crumbs": [
+      "Core"
+    ]
+  },
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "simbox",
+    "section": "",
+    "text": "We use pydrake heavily. The examples are derived from LeafSystem. Basic understandings of pydrake’s functionalities see the two tutorial notebooks dynamical_systems and optimization. See doc.",
+    "crumbs": [
+      "simbox"
+    ]
+  },
+  {
+    "objectID": "index.html#install",
+    "href": "index.html#install",
+    "title": "simbox",
+    "section": "Install",
+    "text": "Install\nClone this repo, open a terminal in the same directory and run\npip install -e .",
+    "crumbs": [
+      "simbox"
+    ]
+  }
+]

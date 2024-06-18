@@ -1,0 +1,109 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="809pt" height="238pt" viewBox="0.00 0.00 809.25 238.00">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 234)">
+<title>_6</title>
+<polygon fill="white" stroke="none" points="-4,4 -4,-234 805.25,-234 805.25,4 -4,4"/>
+<g id="clust1" class="cluster">
+<title>cluster6diagram</title>
+<polygon fill="none" stroke="black" points="8,-8 8,-222 793.25,-222 793.25,-8 8,-8"/>
+<text text-anchor="start" x="374.75" y="-201.7" font-family="Times,serif" font-weight="bold" font-size="14.00">Diagram</text>
+</g>
+<g id="clust3" class="cluster">
+<title>clusters6out</title>
+<polygon fill="lightgrey" stroke="lightgrey" points="635.5,-104 635.5,-181 785.25,-181 785.25,-104 635.5,-104"/>
+<text text-anchor="middle" x="710.38" y="-163.7" font-family="Times,serif" font-size="14.00">output ports</text>
+</g>
+<g id="clust2" class="cluster">
+<title>clusters6in</title>
+<polygon fill="lightgrey" stroke="lightgrey" points="16,-16 16,-93 121.5,-93 121.5,-16 16,-16"/>
+<text text-anchor="middle" x="68.75" y="-75.7" font-family="Times,serif" font-size="14.00">input ports</text>
+</g>
+<g id="clust4" class="cluster">
+<title>cluster6subsystems</title>
+<polygon fill="none" stroke="white" points="141.5,-16 141.5,-96 772.88,-96 772.88,-16 141.5,-16"/>
+</g>
+<!-- s6in -->
+<g id="node1" class="node">
+<title>s6in</title>
+<polygon fill="none" stroke="blue" points="35,-30.75 35,-53.25 102.5,-53.25 102.5,-30.75 35,-30.75"/>
+<text text-anchor="start" x="38" y="-36.95" font-family="Times,serif" font-size="14.00">shift_inp_u</text>
+</g>
+<!-- s3 -->
+<g id="node3" class="node">
+<title>s3</title>
+<polygon fill="none" stroke="black" points="157.5,-50 157.5,-84 275.5,-84 275.5,-50 157.5,-50"/>
+<text text-anchor="start" x="160.25" y="-68.7" font-family="Times,serif" font-weight="bold" font-size="14.00">chemsim.core.Shift</text>
+<text text-anchor="start" x="173.38" y="-54.7" font-family="Times,serif" font-size="14.00">name=shift_inp</text>
+<polygon fill="none" stroke="black" points="157.5,-28 157.5,-50 197.5,-50 197.5,-28 157.5,-28"/>
+<text text-anchor="start" x="174.12" y="-33.7" font-family="Times,serif" font-size="14.00">u</text>
+<polygon fill="none" stroke="black" points="197.5,-28 197.5,-50 275.5,-50 275.5,-28 197.5,-28"/>
+<text text-anchor="start" x="214.75" y="-33.7" font-family="Times,serif" font-size="14.00">y=u+y0</text>
+</g>
+<!-- s6in&#45;&gt;s3 -->
+<g id="edge4" class="edge">
+<title>s6in:e-&gt;s3:w</title>
+<path fill="none" stroke="blue" d="M103.75,-42C123.01,-42 130.37,-39.98 145.35,-39.26"/>
+<polygon fill="blue" stroke="blue" points="145.07,-42.76 154.99,-39.03 144.91,-35.77 145.07,-42.76"/>
+</g>
+<!-- s6out -->
+<g id="node2" class="node">
+<title>s6out</title>
+<polygon fill="none" stroke="green" points="654.5,-118.75 654.5,-141.25 766.25,-141.25 766.25,-118.75 654.5,-118.75"/>
+<text text-anchor="start" x="657.5" y="-124.95" font-family="Times,serif" font-size="14.00">shift_state_y=u+y0</text>
+</g>
+<!-- s2 -->
+<g id="node4" class="node">
+<title>s2</title>
+<polygon fill="none" stroke="black" points="327.5,-50 327.5,-84 429.5,-84 429.5,-50 327.5,-50"/>
+<text text-anchor="start" x="330.12" y="-68.7" font-family="Times,serif" font-weight="bold" font-size="14.00">__main__.CSTR</text>
+<text text-anchor="start" x="342.5" y="-54.7" font-family="Times,serif" font-size="14.00">name=CSTR</text>
+<polygon fill="none" stroke="black" points="327.5,-28 327.5,-50 370.5,-50 370.5,-28 327.5,-28"/>
+<text text-anchor="start" x="345.62" y="-33.7" font-family="Times,serif" font-size="14.00">u</text>
+<polygon fill="none" stroke="black" points="370.5,-28 370.5,-50 429.5,-50 429.5,-28 370.5,-28"/>
+<text text-anchor="start" x="389.12" y="-33.7" font-family="Times,serif" font-size="14.00">y=x</text>
+</g>
+<!-- s3&#45;&gt;s2 -->
+<g id="edge3" class="edge">
+<title>s3:e-&gt;s2:w</title>
+<path fill="none" stroke="black" d="M276.5,-39C294.38,-39 301.47,-39 315.14,-39"/>
+<polygon fill="black" stroke="black" points="314.99,-42.5 324.99,-39 314.99,-35.5 314.99,-42.5"/>
+</g>
+<!-- s4 -->
+<g id="node5" class="node">
+<title>s4</title>
+<polygon fill="none" stroke="black" points="481.5,-50 481.5,-84 599.5,-84 599.5,-50 481.5,-50"/>
+<text text-anchor="start" x="484.25" y="-68.7" font-family="Times,serif" font-weight="bold" font-size="14.00">chemsim.core.Shift</text>
+<text text-anchor="start" x="493.62" y="-54.7" font-family="Times,serif" font-size="14.00">name=shift_state</text>
+<polygon fill="none" stroke="black" points="481.5,-28 481.5,-50 521.5,-50 521.5,-28 481.5,-28"/>
+<text text-anchor="start" x="498.12" y="-33.7" font-family="Times,serif" font-size="14.00">u</text>
+<polygon fill="none" stroke="black" points="521.5,-28 521.5,-50 599.5,-50 599.5,-28 521.5,-28"/>
+<text text-anchor="start" x="538.75" y="-33.7" font-family="Times,serif" font-size="14.00">y=u+y0</text>
+</g>
+<!-- s2&#45;&gt;s4 -->
+<g id="edge1" class="edge">
+<title>s2:e-&gt;s4:w</title>
+<path fill="none" stroke="black" d="M430.5,-39C448.38,-39 455.47,-39 469.14,-39"/>
+<polygon fill="black" stroke="black" points="468.99,-42.5 478.99,-39 468.99,-35.5 468.99,-42.5"/>
+</g>
+<!-- s4&#45;&gt;s6out -->
+<g id="edge5" class="edge">
+<title>s4:e-&gt;s6out:w</title>
+<path fill="none" stroke="green" d="M600.5,-39C642.89,-39 613.46,-113.74 642.38,-127.75"/>
+<polygon fill="green" stroke="green" points="641.39,-131.12 651.89,-129.7 642.8,-124.26 641.39,-131.12"/>
+</g>
+<!-- s5 -->
+<g id="node6" class="node">
+<title>s5</title>
+<polygon fill="none" stroke="black" points="663.88,-50 663.88,-72 756.88,-72 756.88,-50 663.88,-50"/>
+<text text-anchor="start" x="666.88" y="-56.7" font-family="Times,serif" font-weight="bold" font-size="14.00">VectorLogSink</text>
+<polygon fill="none" stroke="black" points="663.88,-28 663.88,-50 720.88,-50 720.88,-28 663.88,-28"/>
+<text text-anchor="start" x="681.12" y="-33.7" font-family="Times,serif" font-size="14.00">data</text>
+<polyline fill="none" stroke="grey" points="720.88,-28 756.88,-28 756.88,-50"/>
+</g>
+<!-- s4&#45;&gt;s5 -->
+<g id="edge2" class="edge">
+<title>s4:e-&gt;s5:w</title>
+<path fill="none" stroke="black" d="M600.5,-39C623.81,-39 632.3,-39 651.1,-39"/>
+<polygon fill="black" stroke="black" points="650.86,-42.5 660.86,-39 650.86,-35.5 650.86,-42.5"/>
+</g>
+</g>
+</svg>
