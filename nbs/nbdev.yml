@@ -1,0 +1,9 @@
+project:
+  output-dir: _docs
+
+website:
+  title: "simbox"
+  site-url: "https://ts-flake.github.io/simbox"
+  description: "A collection of dynamical system examples and simulations."
+  repo-branch: main
+  repo-url: "https://github.com/ts-flake/simbox"

@@ -1,0 +1,13 @@
+website:
+  sidebar:
+    contents:
+      - index.ipynb
+      - 00_core.ipynb
+      - section: Examples
+        contents:
+        - 03a_examples.physics.ipynb
+        - 03b_examples.chemistry.ipynb
+      - section: Tutorials
+        contents:
+        - 01_tutorial.dynamical_systems.ipynb
+        - 02_tutorial.optimization.ipynb
